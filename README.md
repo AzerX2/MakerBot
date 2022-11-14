@@ -8,7 +8,7 @@ Bot de l'atelier lyon
 > Argument : <nom> <description> <catégorie>  
 > Utilité : crée un channel pour un nouveau projet dans une catégorie propre  
   
-/start  
+/request  
 > Permission nécessaire : Aucune
 > Argument : <nom> <description> <catégorie>  
 > Utilité : permet de faire une demande de création de projet au sein de l'atelier  
