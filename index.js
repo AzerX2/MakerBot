@@ -102,20 +102,26 @@ client.on('interactionCreate', async interaction => {
         } else {
             if (interaction.isButton()) {
                 if (interaction.customId === "addtime") {
-                    // on utilise guildSheduleEventCreate pour créer un événement
-                    const event = await interaction.guild.scheduleEventCreate({
+                    // on utilise GuildScheduledEvent pour créer un événement (external)
+                    const event = await interaction.guild.scheduledEvents.create({
                         name: 'Atelier',
+                        entityType: 'EXTERNAL',
+                        channelId: "1041101782199316605",
+                        scheduledStartTime: new Date(Date.now()+ 5000),
+                        scheduledEndTime: new Date(Date.now() + 2000 * 3600),
                         privacyLevel: 'GUILD_ONLY',
-                        scheduledStartTime: new Date(Date.now()),
-                        scheduledEndTime: new Date(Date.now() + 2000 * 60),
+                        status: 'SCHEDULED',
                         description: 'L\'atelier est ouvert !',
-                        channel: interaction.channel
-                    });
+                        entityMetadata: {
+                            location: 'Atelier',
+                        },
+                    }).then(
+                
                     // une fois l'événement créé, on envoie un message
                     interaction.reply({
                         content: 'L\'atelier est ouvert ! pendant 2H',
                         ephemeral: true
-                    });
+                    })).catch(err => console.log(err));
 
 
                     
