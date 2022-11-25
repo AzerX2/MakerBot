@@ -13,7 +13,7 @@ const {
 const {
     Routes
 } = require('discord-api-types/v9');
-const commandFiles = fs.readdirSync('./SlashCommandes').filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync('./SlashCommand').filter(file => file.endsWith('.js'));
 const TEST_GUILD_ID = cf.testguild;
 
 //Handler
@@ -21,7 +21,7 @@ const commands2 = [];
 const TOKEN = cf.token;
 client.commands2 = new Collection();
 for (const file of commandFiles) {
-    const command = require(`./SlashCommandes/${file}`);
+    const command = require(`./SlashCommand/${file}`);
     commands2.push(command.data.toJSON());
     client.commands2.set(command.data.name, command);
 }
