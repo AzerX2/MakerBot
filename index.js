@@ -49,31 +49,6 @@ client.on('ready', () => {
     console.log(`\nLogged as ${client.user.tag} (${client.user.id}) on ${client.guilds.cache.size} server(s) \n`);
     client.user.setActivity(` l'atelier | /help`, { type: "WATCHING" });
 
-    //Verification toute les heures si l'atelier est ouvert ou non
-    setInterval(() => {
-        const Channel = client.channels.cache.get(cf.isopen);
-        Channel.messages.fetch({ limit: 5 }).then(messages => {
-            messages.forEach(message => {
-                if (message.author.id == client.user.id) {
-                    message.delete();
-                }
-            });
-        });
-        const guild = client.guilds.cache.get(cf.testguild);
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle('Atelier')
-            .setTimestamp()
-            .setFooter({ text: 'Provient de ' + guild.name })
-        if (verif()) {
-            embed.setDescription(`L'atelier est ouvert`)
-            client.channels.cache.get(cf.isopen).send({ embeds: [embed] });
-        } else {
-            embed.setDescription(`L'atelier est fermé`)
-            client.channels.cache.get(cf.isopen).send({ embeds: [embed] });
-        }
-    }, 600000); //1800000 = 30 minutes | 600000 = 10 minutes
-
 
     //Enregistrement des slash commandes
     const CLIENT_ID = client.user.id;
