@@ -138,12 +138,12 @@ client.on('interactionCreate', async interaction => {
                         ]
                     }).then(async channel => {
                         // on envoie un message dans le channel
-                        channel.send(`<@${interaction.user.id}>`, {
-                            embed: {
-                                title: 'Bienvenue sur votre ticket !',
-                                description: 'Un membre du staff vous répondra dans les plus brefs délais !',
-                                color: 'RANDOM'
-                            }
+                        let embed = new MessageEmbed()
+                            .setTitle('Bienvenue sur votre ticket !')
+                            .setDescription('Un membre du staff vous répondra dans les plus brefs délais !')
+                            .setColor('RANDOM')
+                        channel.send({
+                            embeds: [embed], content: "<@"+interaction.user.id+">"
                         })
                     })
 
