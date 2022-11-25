@@ -19,7 +19,7 @@ module.exports = {
             const row = new MessageActionRow()
                 .addComponents(
                     new MessageButton()
-                    .setCustomId('open')
+                    .setCustomId('open-ticket')
                     .setLabel('🔰')
                     .setStyle('PRIMARY'),
                 );

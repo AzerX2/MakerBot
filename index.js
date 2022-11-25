@@ -121,7 +121,7 @@ client.on('interactionCreate', async interaction => {
                     
                 }
                 if (interaction.customId === "open-ticket"){
-                    let ticket = cf.ticketid;
+                    let ticket = cf.ticket;
                     // ticket est la catégorie qui on les tickets
                     //on crée un channel dans la catégorie ticket
                     interaction.guild.channels.create(`ticket-${interaction.user.username}`, {
