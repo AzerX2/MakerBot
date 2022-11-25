@@ -27,19 +27,7 @@ for (const file of commandFiles) {
 }
 
 //Bdd
-const isopen = JSON.parse(fs.readFileSync('./isopen.json', 'utf8'));
 const projet = JSON.parse(fs.readFileSync('./projet.json', 'utf8'));
-
-//function
-function verif() {
-    if (!isopen[TEST_GUILD_ID]) {
-        isopen[TEST_GUILD_ID] = Date.now();
-        fs.writeFileSync('./isopen.json', JSON.stringify(isopen, null, 4), (err) => {
-            if (err) console.log(err);
-        });
-    }
-    return isopen[TEST_GUILD_ID] > Date.now()
-}
 
 
 //Ready
@@ -94,6 +82,7 @@ client.on('interactionCreate', async interaction => {
     } else {
         if (interaction.isSelectMenu()) {
             if (interaction.customId === 'select') {
+                // menu déroulant qui permet d'avoir accès au différentes catégories de projets
                 const value = interaction.values[0];
                 const role = interaction.guild.roles.cache.find(role => role.name === value);
                 if (interaction.member.roles.cache.has(role.id)) {
@@ -113,12 +102,52 @@ client.on('interactionCreate', async interaction => {
         } else {
             if (interaction.isButton()) {
                 if (interaction.customId === "addtime") {
-                    isopen[interaction.guild.id] = Date.now() + 2 * 3600000; //2 * 3600000 = 2 heures
-                    fs.writeFileSync('./isopen.json', JSON.stringify(isopen));
+                    // on utilise guildSheduleEventCreate pour créer un événement
+                    const event = await interaction.guild.scheduleEventCreate({
+                        name: 'Atelier',
+                        privacyLevel: 'GUILD_ONLY',
+                        scheduledStartTime: new Date(Date.now()),
+                        scheduledEndTime: new Date(Date.now() + 2000 * 60),
+                        description: 'L\'atelier est ouvert !',
+                        channel: interaction.channel
+                    });
+                    // une fois l'événement créé, on envoie un message
                     interaction.reply({
-                        content: 'Le temps a été ajouté !',
+                        content: 'L\'atelier est ouvert ! pendant 2H',
                         ephemeral: true
                     });
+
+
+                    
+                }
+                if (interaction.customId === "open-ticket"){
+                    let ticket = cf.ticketid;
+                    // ticket est la catégorie qui on les tickets
+                    //on crée un channel dans la catégorie ticket
+                    interaction.guild.channels.create(`ticket-${interaction.user.username}`, {
+                        type: 'text',
+                        parent: ticket,
+                        permissionOverwrites: [{
+                            id: interaction.user.id,
+                            allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY']
+                        },
+                        {
+                            id: interaction.guild.roles.everyone,
+                            deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY']
+                        }
+                        ]
+                    }).then(async channel => {
+                        // on envoie un message dans le channel
+                        channel.send(`<@${interaction.user.id}>`, {
+                            embed: {
+                                title: 'Bienvenue sur votre ticket !',
+                                description: 'Un membre du staff vous répondra dans les plus brefs délais !',
+                                color: 'RANDOM'
+                            }
+                        })
+                    })
+
+
                 }
             } else {
                 return;
