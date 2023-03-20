@@ -3,20 +3,15 @@ Bot de l'atelier lyon
 
 ## Commandes  
 
-/start  
-> Permission nécessaire : Admin  
-> Argument : <nom> <description> <catégorie>  
-> Utilité : crée un channel pour un nouveau projet dans une catégorie propre  
-  
-/request  
-> Permission nécessaire : Aucune  
-> Argument : <nom> <description> <catégorie>  
-> Utilité : permet de faire une demande de création de projet au sein de l'atelier  
+/perm 
+> Permission nécessaire : Admin
+> Argument : lun, mar, mer, jeu, ven
+> Utilité : permet de renseignez les horaires d'ouverture dans la semaine
 
-/set /button /set-ticket  
+/button
 > Permission nécessaire : Admin  
 > Argument : <>  
-> Utilité : permet d'envoyer les messages de menu et avec des boutons  
+> Utilité : permet d'envoyer les messages avec des boutons  
   
 ## Fonctionalité supplémentaire  
   
