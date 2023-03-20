@@ -3,7 +3,7 @@ const { Client, Collection, Intents, MessageEmbed, Permissions } = require('disc
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES] });
 
 //Config
-const cf = require('./config.json');
+require('dotenv').config();
 const fs = require('fs');
 
 //Slash Commands
@@ -13,12 +13,13 @@ const {
 const {
     Routes
 } = require('discord-api-types/v9');
+const { get } = require('http');
 const commandFiles = fs.readdirSync('./SlashCommand').filter(file => file.endsWith('.js'));
-const TEST_GUILD_ID = cf.testguild;
+const TEST_GUILD_ID = "1041101782199316601";
 
 //Handler
 const commands2 = [];
-const TOKEN = cf.token;
+const TOKEN = process.env.TOKEN;
 client.commands2 = new Collection();
 for (const file of commandFiles) {
     const command = require(`./SlashCommand/${file}`);
@@ -27,15 +28,85 @@ for (const file of commandFiles) {
 }
 
 //Bdd
-const projet = JSON.parse(fs.readFileSync('./projet.json', 'utf8'));
+const perm = JSON.parse(fs.readFileSync('./perm.json', 'utf8'));
+
+// Function
+
+async function permEmbed() {
+    let guild = client.guilds.cache.get(TEST_GUILD_ID);
+    let txt = "Voici les horaires des permanences de cette semaine\n";
+    let semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+    for (let i = 0; i < perm.length; i++) {
+        if(perm[i] != "0"){
+            txt += `\`\`\`prolog\n ${semaine[i]} : ${perm[i].join(" ").replaceAll("-","->")}\`\`\``;
+        }
+
+    }
 
 
+    let embed = new MessageEmbed()
+        .setTitle('Permanence')
+        .setDescription(txt)
+        // footer avec text : nom de la guild et iconURL : l'avatar de la guild
+        .setFooter({ text: guild.name, iconURL: guild.iconURL() })
+        .setTimestamp()
+        .setColor("RED");
+    
+    // on va ensuite créé un évenement pour chaque jour, si perm[0] = ["12-14", "14-16"] alors on créé un évenement pour le lundi de 12h à 14h et de 14h à 16h comme quoi l'atelier est ouvert
+    let years = new Date(Date.now()).getFullYear();
+    let monthIndex = new Date(Date.now()).getMonth();
+    let days = new Date(Date.now()).getDate();
+    /*for(let i = 0; i < perm.length; i++) {
+        for(let j = 0; j < perm[i].length; j++) {
+            if (perm[i][j] == "0") continue;
+            let heure = perm[i][j].split('-');
+            const event = await guild.scheduledEvents.create({
+                name: 'Atelier',
+                entityType: 'EXTERNAL',
+                channelId: "1087387048215851008",
+                scheduledStartTime: new Date(years, monthIndex, days+i, heure[0]),
+                scheduledEndTime: new Date(years, monthIndex, days+i, heure[1]),
+                privacyLevel: 'GUILD_ONLY',
+                status: 'SCHEDULED',
+                description: 'L\'atelier est ouvert !',
+                entityMetadata: {
+                    location: 'Atelier',
+                },
+            }).catch(console.error);
+        }
+    }*/
+
+    // on envoie au channel qui à comme id process.env.perm
+    guild.channels.cache.get(process.env.perm).send({ embeds: [embed] });
+
+}
+
+function killevent(){
+    //fonction pour supprimer tout les sheduledEvents de la guild
+    let guild = client.guilds.cache.get(TEST_GUILD_ID);
+    guild.scheduledEvents.fetch().then(events => {
+        events.forEach(event => {
+            event.delete();
+        })
+    }
+    )
+}
 //Ready
 client.on('ready', () => {
 
     //Mise en route
     console.log(`\nLogged as ${client.user.tag} (${client.user.id}) on ${client.guilds.cache.size} server(s) \n`);
     client.user.setActivity(` l'atelier | /help`, { type: "WATCHING" });
+
+    permEmbed();
+    //killevent();
+    setInterval(() => {
+        // on récupère la date et si c'est lundi 8h on fait permEmbed()
+        let date = new Date();
+        if(date.getDay() == 1 && date.getHours() == 8) {
+            permEmbed();
+        }
+    }, 1000*60*60);
 
 
     //Enregistrement des slash commandes
@@ -106,7 +177,7 @@ client.on('interactionCreate', async interaction => {
                     const event = await interaction.guild.scheduledEvents.create({
                         name: 'Atelier',
                         entityType: 'EXTERNAL',
-                        channelId: "1041101782199316605",
+                        channelId: "1087387048215851008",
                         scheduledStartTime: new Date(Date.now()+ 5000),
                         scheduledEndTime: new Date(Date.now() + 2000 * 3600),
                         privacyLevel: 'GUILD_ONLY',
@@ -126,35 +197,6 @@ client.on('interactionCreate', async interaction => {
 
                     
                 }
-                if (interaction.customId === "open-ticket"){
-                    let ticket = cf.ticket;
-                    // ticket est la catégorie qui on les tickets
-                    //on crée un channel dans la catégorie ticket
-                    interaction.guild.channels.create(`ticket-${interaction.user.username}`, {
-                        type: 'text',
-                        parent: ticket,
-                        permissionOverwrites: [{
-                            id: interaction.user.id,
-                            allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY']
-                        },
-                        {
-                            id: interaction.guild.roles.everyone,
-                            deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY']
-                        }
-                        ]
-                    }).then(async channel => {
-                        // on envoie un message dans le channel
-                        let embed = new MessageEmbed()
-                            .setTitle('Bienvenue sur votre ticket !')
-                            .setDescription('Un membre du staff vous répondra dans les plus brefs délais !')
-                            .setColor('RANDOM')
-                        channel.send({
-                            embeds: [embed], content: "<@"+interaction.user.id+">"
-                        })
-                    })
-
-
-                }
             } else {
                 return;
             }
@@ -162,33 +204,5 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-//Guild member add
-
-client.on('guildMemberAdd', member => {
-    console.log("Un membre a rejoint le serveur");
-    const channel = cf.arriver
-
-    const embed = new MessageEmbed()
-        .setColor('#0099ff')
-        .setTitle('Bienvenue')
-        .setDescription(`Bienvenue ${member.user.username} sur le serveur ${member.guild.name} !`)
-        .setTimestamp()
-
-    member.guild.channels.cache.get(channel).send({
-        embeds: [embed]
-    });
-    const embed2 = new MessageEmbed()
-        .setColor('#0099ff')
-        .setTitle('Bienvenue sur l\'atelier de lyon')
-        .setDescription(`n'hésite pas à prendre tes rôles qui te donne accès au projet qui t'intéresse => <#${cf.rolechannel}> ! \nTu as aussi le réglement à lire => <#${cf.reglement}> !\nSi tu as la moindre question le staff est présent pour te répondre !`)
-        .setTimestamp()
-    member.send({
-        embeds: [embed2]
-    });
-});
-
-
-
-
 //login
-client.login(cf.token)
+client.login(process.env.TOKEN);

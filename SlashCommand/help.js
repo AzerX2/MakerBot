@@ -13,7 +13,7 @@ module.exports = {
         const prefix = "/";
         const newemb = new MessageEmbed()
             .setTitle('Help')
-            .setDescription(`\`\`\`prolog\n${prefix}isopen\n${prefix}ping\n${prefix}ram\n${prefix}start\n${prefix}request\n${prefix}invoice\n${prefix}set\n${prefix}uptime\`\`\``)
+            .setDescription(`\`\`\`prolog\n${prefix}button\n${prefix}ping\n${prefix}perm\`\`\``)
             .setFooter({ text: interaction.member.displayName, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
             .setTimestamp()
             .setColor(interaction.guild.me.displayHexColor);

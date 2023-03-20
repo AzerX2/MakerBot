@@ -106,6 +106,7 @@ dist
 
 # Token
 config.json
+.env
 
 # node_modules
 node_modules
