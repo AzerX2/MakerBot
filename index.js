@@ -37,7 +37,7 @@ async function permEmbed() {
     let txt = "Voici les horaires des permanences de cette semaine\n";
     let semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
     for (let i = 0; i < perm.length; i++) {
-        if(perm[i] != "0"){
+        if (perm[i] != "0") {
             txt += `\`\`\`prolog\n ${semaine[i]} : ${perm[i].join(" ").replaceAll("-","->")}\`\`\``;
         }
 
@@ -51,21 +51,31 @@ async function permEmbed() {
         .setFooter({ text: guild.name, iconURL: guild.iconURL() })
         .setTimestamp()
         .setColor("RED");
-    
+
     // on va ensuite créé un évenement pour chaque jour, si perm[0] = ["12-14", "14-16"] alors on créé un évenement pour le lundi de 12h à 14h et de 14h à 16h comme quoi l'atelier est ouvert
     let years = new Date(Date.now()).getFullYear();
     let monthIndex = new Date(Date.now()).getMonth();
     let days = new Date(Date.now()).getDate();
-    /*for(let i = 0; i < perm.length; i++) {
-        for(let j = 0; j < perm[i].length; j++) {
+    for (let i = 0; i < perm.length; i++) {
+        for (let j = 0; j < perm[i].length; j++) {
             if (perm[i][j] == "0") continue;
             let heure = perm[i][j].split('-');
+            let minute1 = 0;
+            let minute2 = 0;
+            if (heure[0].includes(":")) {
+                minute1 = heure[0].split(":")[1];
+                heure[0] = heure[0].split(":")[0];
+            }
+            if (heure[1].includes(":")) {
+                minute2 = heure[1].split(":")[1];
+                heure[1] = heure[1].split(":")[0];
+            }
             const event = await guild.scheduledEvents.create({
                 name: 'Atelier',
                 entityType: 'EXTERNAL',
                 channelId: "1087387048215851008",
-                scheduledStartTime: new Date(years, monthIndex, days+i, heure[0]),
-                scheduledEndTime: new Date(years, monthIndex, days+i, heure[1]),
+                scheduledStartTime: new Date(years, monthIndex, days + i, heure[0], minute1),
+                scheduledEndTime: new Date(years, monthIndex, days + i, heure[1], minute2),
                 privacyLevel: 'GUILD_ONLY',
                 status: 'SCHEDULED',
                 description: 'L\'atelier est ouvert !',
@@ -74,22 +84,32 @@ async function permEmbed() {
                 },
             }).catch(console.error);
         }
-    }*/
+    }
 
     // on envoie au channel qui à comme id process.env.perm
     guild.channels.cache.get(process.env.perm).send({ embeds: [embed] });
 
+    // on recupère les 5 derniers messages du channel et si l'utilisateur à l'id de client.user.id on suprime le message
+    guild.channels.cache.get(process.env.perm).messages.fetch({
+        limit: 5
+    }).then(messages => {
+        messages.forEach(message => {
+            if (message.author.id == client.user.id) {
+                message.delete();
+            }
+        })
+    })
+
 }
 
-function killevent(){
+function killevent() {
     //fonction pour supprimer tout les sheduledEvents de la guild
     let guild = client.guilds.cache.get(TEST_GUILD_ID);
     guild.scheduledEvents.fetch().then(events => {
         events.forEach(event => {
             event.delete();
         })
-    }
-    )
+    })
 }
 //Ready
 client.on('ready', () => {
@@ -98,15 +118,15 @@ client.on('ready', () => {
     console.log(`\nLogged as ${client.user.tag} (${client.user.id}) on ${client.guilds.cache.size} server(s) \n`);
     client.user.setActivity(` l'atelier | /help`, { type: "WATCHING" });
 
-    permEmbed();
     //killevent();
+    //permEmbed();
     setInterval(() => {
         // on récupère la date et si c'est lundi 8h on fait permEmbed()
         let date = new Date();
-        if(date.getDay() == 1 && date.getHours() == 8) {
+        if (date.getDay() == 1 && date.getHours() == 8) {
             permEmbed();
         }
-    }, 1000*60*60);
+    }, 1000 * 60 * 60);
 
 
     //Enregistrement des slash commandes
@@ -178,7 +198,7 @@ client.on('interactionCreate', async interaction => {
                         name: 'Atelier',
                         entityType: 'EXTERNAL',
                         channelId: "1087387048215851008",
-                        scheduledStartTime: new Date(Date.now()+ 5000),
+                        scheduledStartTime: new Date(Date.now() + 5000),
                         scheduledEndTime: new Date(Date.now() + 2000 * 3600),
                         privacyLevel: 'GUILD_ONLY',
                         status: 'SCHEDULED',
@@ -187,15 +207,15 @@ client.on('interactionCreate', async interaction => {
                             location: 'Atelier',
                         },
                     }).then(
-                
-                    // une fois l'événement créé, on envoie un message
-                    interaction.reply({
-                        content: 'L\'atelier est ouvert ! pendant 2H',
-                        ephemeral: true
-                    })).catch(err => console.log(err));
+
+                        // une fois l'événement créé, on envoie un message
+                        interaction.reply({
+                            content: 'L\'atelier est ouvert ! pendant 2H',
+                            ephemeral: true
+                        })).catch(err => console.log(err));
 
 
-                    
+
                 }
             } else {
                 return;
