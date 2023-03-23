@@ -4,10 +4,10 @@ Bot de l'atelier lyon
 ## Commandes  
 
 /perm 
-> Permission nécessaire : Admin
-> Argument : lun, mar, mer, jeu, ven
-> Utilité : permet de renseignez les horaires d'ouverture dans la semaine
-
+> Permission nécessaire : Admin  
+> Argument : lun, mar, mer, jeu, ven  
+> Utilité : permet de renseignez les horaires d'ouverture dans la semaine  
+  
 /button
 > Permission nécessaire : Admin  
 > Argument : <>  
